@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Network Location Audit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 p-4 md:p-10 font-sans text-slate-100">
+
+    <div class="max-w-2xl mx-auto bg-slate-800 p-8 rounded-3xl shadow-2xl border border-slate-700">
+        <div class="flex justify-between items-center mb-8 border-b border-slate-700 pb-6">
+            <div>
+                <h1 class="text-3xl font-black text-indigo-400 tracking-tighter">IP<span class="text-white">TRACE</span></h1>
+                <p class="text-slate-400 text-xs uppercase tracking-widest font-semibold">Network Intelligence Terminal</p>
+            </div>
+            <div class="text-right">
+                <span class="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-3 py-1 rounded-full border border-emerald-500/20">LIVE ACCESS</span>
+            </div>
+        </div>
+        
+        <button onclick="performAudit()" id="btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-xl font-bold transition-all shadow-lg shadow-indigo-500/20 mb-8 active:scale-95">
+            IDENTIFY CONNECTION SOURCE
+        </button>
+
+        <div id="resultBox" class="hidden space-y-4">
+            <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-700">
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Public IP Address</label>
+                <p id="outIP" class="text-2xl font-mono text-white">-</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-700/20 p-4 rounded-xl border border-slate-700/50">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">City / Region</label>
+                    <p id="outCity" class="text-lg text-indigo-300">-</p>
+                </div>
+                <div class="bg-slate-700/20 p-4 rounded-xl border border-slate-700/50">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">Country</label>
+                    <p id="outCountry" class="text-lg text-white">-</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-700/20 p-4 rounded-xl border border-slate-700/50">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">Latitude</label>
+                    <p id="outLat" class="text-lg font-mono text-emerald-400">-</p>
+                </div>
+                <div class="bg-slate-700/20 p-4 rounded-xl border border-slate-700/50">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">Longitude</label>
+                    <p id="outLon" class="text-lg font-mono text-emerald-400">-</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-700/20 p-4 rounded-xl border border-slate-700/50">
+                <label class="text-[10px] font-bold text-slate-500 uppercase">ISP / Organization</label>
+                <p id="outISP" class="text-sm text-slate-300 truncate">-</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function performAudit() {
+    const btn = document.getElementById('btn');
+    btn.innerText = "QUERYING NETWORK...";
+    
+    try {
+        // Using a different, very stable endpoint
+        const response = await fetch('https://api.ipify.org?format=json');
+        const ipData = await response.json();
+        
+        // Now that we have the IP, get the location details
+        const geoResponse = await fetch(`https://ipapi.co/${ipData.ip}/json/`);
+        const data = await geoResponse.json();
+
+        if (data.ip) {
+            document.getElementById('resultBox').classList.remove('hidden');
+            document.getElementById('outIP').innerText = data.ip;
+            document.getElementById('outCity').innerText = data.city;
+            document.getElementById('outCountry').innerText = data.country_name;
+            document.getElementById('outLat').innerText = data.latitude;
+            document.getElementById('outLon').innerText = data.longitude;
+            document.getElementById('outISP').innerText = data.org;
+        }
+    } catch (err) {
+        console.error("Trace failed:", err);
+        alert("Netlify Block: Check your browser console or disable AdBlock.");
+    } finally {
+        btn.innerText = "IDENTIFY CONNECTION SOURCE";
+    }
+}
+    </script>
+</body>
+</html>
